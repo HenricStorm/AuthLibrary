@@ -1,4 +1,4 @@
-function Save-CBToken
+function Save-CoinbaseToken
 {
     param (
         [Parameter(Mandatory = $true)]

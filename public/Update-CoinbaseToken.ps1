@@ -1,5 +1,5 @@
 # Refreshes token (Coinbase)
-function Update-CBToken {
+function Update-CoinbaseToken {
     param (
         [PSCustomObject]$Token,
         $AppData

@@ -1,9 +1,9 @@
-function Get-CBToken {
+function Get-CoinbaseToken {
     param (
         [object]$AppData
     )
 
-    $token = Get-CBSavedToken -Application Coinbase
+    $token = Get-CoinbaseSavedToken -Application Coinbase
 
     if (!$token) {
         $additionalParameters = @("account=all"; "state=SECURE_RANDOM")
@@ -18,12 +18,12 @@ function Get-CBToken {
             Verbose              = $true
         }
         $token = New-AuthorizationCodeFlowToken @params
-        Save-CBToken -Token $token -Application Coinbase
+        Save-CoinbaseToken -Token $token -Application Coinbase
     }
     elseif ((Get-Date -UFormat %s) -gt ($token.created_at + $token.expires_in)) {
         Write-Host "Token HAS expired. Renewing token!"
-        $token = Update-CBToken -Token $token
-        Save-CBToken -Token $token -Application Coinbase
+        $token = Update-CoinbaseToken -Token $token
+        Save-CoinbaseToken -Token $token -Application Coinbase
     }
 
     #Write-Host "Token has NOT expired. Valid until $(Get-Date -UnixTimeSeconds ($token.created_at + $token.expires_in) -Format 'yyyy-MM-dd HH:mm:ss')"

@@ -1,23 +1,31 @@
 # Generate new token using the Authorization Code Flow with PKCE
-# Example DEV; $t = New-AuthorizationCodeFlowwithPKCEToken -ClientId "Lpm7yAITd7wR0Xk2jUPbrlw1dEVXDkhz" -Scopes "openid","profile","email","read:workorder","update:workorder","read:workorder-proposedwork","update:workorder-proposedwork","read:workorder-completedwork","update:workorder-completedwork" -Audience "https://acos01apms.azure-api.net" -LoginHint "henric@thestorms.se" -RedirectUri "https://jwt.ms" -Auth0Domain "identity-dev.coor.com"
-# Example PROD; $t = New-AuthorizationCodeFlowwithPKCEToken -ClientId "1ACjkTgMLojkB1tloTbRXuADTQ1wQLnP" -Scopes "openid","profile","email","read:workorder","update:workorder","read:workorder-proposedwork","update:workorder-proposedwork","read:workorder-completedwork","update:workorder-completedwork" -Audience "https://acos02apms.azure-api.net" -LoginHint "henric@thestorms.se" -RedirectUri "https://jwt.ms" -Auth0Domain "identity.coor.com"
-
 function New-AuthorizationCodeFlowwithPKCEToken
 {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [string]$ClientId,
+        [string]
+        $ClientId,
+
         [Parameter(Mandatory)]
-        [string[]]$Scopes,
+        [string[]]
+        $Scopes,
+
         [Parameter()]
-        [string]$Audience,
+        [string]
+        $Audience,
+
         [Parameter()]
-        [string]$LoginHint,
+        [string]
+        $LoginHint,
+
         [Parameter(Mandatory)]
-        [string]$RedirectUri,
+        [string]
+        $RedirectUri,
+
         [Parameter(Mandatory)]
-        [string]$Auth0Domain
+        [string]
+        $Auth0Domain
     )
 
     # In order to this function to run, Silenium Web Driver DLL needs to be downloaded; https://www.selenium.dev/downloads/
