@@ -25,6 +25,14 @@ function New-AuthorizationCodeFlowwithPKCEToken
 
         [Parameter(Mandatory)]
         [string]
+        $AuthorizeEndpointUri,
+
+        [Parameter(Mandatory)]
+        [string]
+        $TokenEndpointUri,
+
+        [Parameter(Mandatory)]
+        [string]
         $Auth0Domain
     )
 
@@ -93,7 +101,8 @@ function New-AuthorizationCodeFlowwithPKCEToken
         $querystring += "&audience=$([System.Web.HTTPUtility]::UrlEncode($Audience))"
     }
 
-    $uri = "$($authorizeEndpoint)?$($querystring)"
+    #$uri = "$($authorizeEndpoint)?$($querystring)"
+    $uri = "$($AuthorizeEndpointUri)?$($querystring)"
     Write-Verbose "Opening URI: $($uri)"
     Write-Verbose "Opening Web browser. Please authenticate."
 
@@ -145,7 +154,8 @@ function New-AuthorizationCodeFlowwithPKCEToken
     }
 
     $params = @{
-        Uri     = $tokenEndpoint
+        #Uri     = $tokenEndpoint
+        Uri     = $TokenEndpointUri
         Method  = "Post"
         Headers = $headers
         Body = $body

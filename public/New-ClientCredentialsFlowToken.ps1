@@ -2,44 +2,52 @@ function New-ClientCredentialsFlowToken {
     [cmdletbinding()]
     Param (
         [Parameter(Mandatory)]
-        [string]$ClientId,
+        [string]
+        $ClientId,
+
         [Parameter(Mandatory)]
-        [string]$ClientSecret,
+        [string]
+        $ClientSecret,
+
         [Parameter(Mandatory)]
-        [string]$Domain,
+        [string]
+        $Domain,
+
         [Parameter(Mandatory)]
-        [string]$Audience,
+        [string]
+        $Audience,
+
         [Parameter()]
-        [switch]$ForceNew = $false
+        [switch]
+        $ForceNew = $false
     )
 
     if (!$ForceNew) {
-        $t = Get-TokenGlobal -ClientId $ClientId
-        if ($t) {
-            return $t
+        $cachedToken = Get-TokenGlobal -ClientId $ClientId
+        if ($cachedToken) {
+            return $cachedToken
         }
     }
 
     $headers = @{
-        "content-type" = "application/json; charset=UTF-8"
+        'content-type' = 'application/json; charset=UTF-8'
     }
 
     $body = @{
-        "client_id"     = $ClientId
-        "client_secret" = $ClientSecret
-        "audience"      = $Audience
-        "grant_type"    = "client_credentials"
+        'client_id'     = $ClientId
+        'client_secret' = $ClientSecret
+        'audience'      = $Audience
+        'grant_type'    = "client_credentials"
     } | ConvertTo-Json
 
     $params = @{
-        Method  = "Post"
-        Uri     = "https://$($Domain)/oauth/token"
+        Method  = 'Post'
+        Uri     = 'https://{0}/oauth/token' -f $Domain
         Headers = $headers
         Body    = $body
     }
     #curl.exe --request POST --url "https://cooriddev.eu.auth0.com/oauth/token" --header ($headers | ConvertTo-Json) --data $body
 
-    #$response = try { Invoke-WebRequest @params -ErrorVariable err } catch { Write-Host $_.Exception }
     $response = Invoke-WebRequest @params
     $token = ConvertFrom-Json -InputObject $response.Content
     Register-TokenGlobal -Token $token

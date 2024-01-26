@@ -13,25 +13,32 @@ function New-AuthorizationCodeFlowToken
         $ClientSecret,
 
         [Parameter(Mandatory)]
-        [string[]]$Scopes,
+        [string[]]
+        $Scopes,
 
         [Parameter()]
-        [string]$Audience,
+        [string]
+        $Audience,
 
         [Parameter()]
-        [string]$LoginHint,
+        [string]
+        $LoginHint,
 
         [Parameter(Mandatory)]
-        [string]$RedirectUri,
+        [string]
+        $RedirectUri,
+
+        [Parameter(Mandatory)]
+        [string]
+        $AuthorizeEndpointUri,
+
+        [Parameter(Mandatory)]
+        [string]
+        $TokenEndpointUri,
 
         [Parameter()]
-        [string]$AuthorizeEndpointUri,
-
-        [Parameter()]
-        [string]$TokenEndpointUri,
-
-        [Parameter()]
-        [string[]]$AdditionalParameters
+        [string[]]
+        $AdditionalParameters
     )
 
     #. "C:\Projects\Coor.CustomerIdentityPlatform\Auth0 Powershell Modules\Manage-Auth0\Private\CheckMsEdgeDriverVersion.ps1"
@@ -39,18 +46,18 @@ function New-AuthorizationCodeFlowToken
 
     # In order to this function to run, Silenium Web Driver DLL needs to be downloaded; https://www.selenium.dev/downloads/
     # Also you need to download the "msedgedriver.exe" matching your Edge browser version; https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver
-    $seleniumWebDriverPath = "C:\Users\HenricStorm\OneDrive - Advania\Kunder\Coor\Auth0 Powershell"
+    $seleniumWebDriverPath = 'C:\Users\HenricStorm\OneDrive - Advania\Kunder\Coor\Auth0 Powershell'
 
-    if (!(CheckMsEdgeDriverVersion -MsEdgeDriverPath "$($seleniumWebDriverPath)\msedgedriver.exe"))
+    if (!(CheckMsEdgeDriverVersion -MsEdgeDriverPath ('{0}\msedgedriver.exe' -f $seleniumWebDriverPath)))
     {
         break
     }
 
     if (!(Get-Module -Name WebDriver))
     {
-        Write-Verbose "Loading module ""WebDriver"""
+        Write-Verbose 'Loading module "WebDriver"'
         try {
-            Import-Module -Name "$($seleniumWebDriverPath)\WebDriver.dll" -ErrorAction Stop
+            Import-Module -Name ('{0}\WebDriver.dll' -f $seleniumWebDriverPath) -ErrorAction Stop
         }
         catch
         {
@@ -62,10 +69,11 @@ function New-AuthorizationCodeFlowToken
     $Scopes = $Scopes -join ' '
 
     # IDP Information
-#    $baseUri = "https://$($Auth0Domain)"
-#    $tokenAuthorizeEndpoint = "$($baseUri)/authorize"
-#    $tokenEndpoint = "$($baseUri)/oauth/token"
+    #$baseUri = "https://$($Auth0Domain)"
+    #$tokenAuthorizeEndpoint = "$($baseUri)/authorize"
+    #$tokenEndpoint = "$($baseUri)/oauth/token"
 
+    <#
     if ($AuthorizeEndpointUri)
     {
         $tokenAuthorizeEndpoint = $AuthorizeEndpointUri
@@ -74,6 +82,7 @@ function New-AuthorizationCodeFlowToken
     {
         $tokenEndpoint = $TokenEndpointUri
     }
+    #>
 
     # Optionals
     #$Audience = "https://acos01apms.azure-api.net"
@@ -83,35 +92,35 @@ function New-AuthorizationCodeFlowToken
         "client_id=$($ClientId)"
         "scope=$([System.Web.HTTPUtility]::UrlEncode($Scopes))"
         "redirect_uri=$([System.Web.HTTPUtility]::UrlEncode($RedirectUri))"
-        "response_type=code"
-    ) -join "&"
-    Write-Host "Querystring: $($querystring)"
+        'response_type=code'
+    ) -join '&'
+    Write-Host ('Querystring: {0}' -f $querystring)
     if ($AdditionalParameters)
     {
-        $querystring += "&" + ($AdditionalParameters -join "&")
+        $querystring += '&{0}' + $AdditionalParameters -join "&"
     }
-    Write-Host "Querystring: $($querystring)"
+    Write-Host ('Querystring: {0}' -f $querystring)
 
     if ($LoginHint) {
-        $querystring += "&login_hint=$([System.Web.HTTPUtility]::UrlEncode($LoginHint))"
+        $querystring += '&login_hint={0}' -f [System.Web.HTTPUtility]::UrlEncode($LoginHint)
     }
     if ($Audience) {
-        $querystring += "&audience=$([System.Web.HTTPUtility]::UrlEncode($Audience))"
+        $querystring += '&audience={0}' -f [System.Web.HTTPUtility]::UrlEncode($Audience)
     }
 
-    $uri = "$($tokenAuthorizeEndpoint)?$($querystring)"
-    Write-Verbose "Opening URI: $($uri)"
-    Write-Verbose "Opening Web browser. Please authenticate."
+    $uri = '{0}?{1}' -f $AuthorizeEndpointUri, $querystring
+    Write-Verbose ('Opening URI: {0}' -f $uri)
+    Write-Verbose 'Opening Web browser. Please authenticate.'
 
     $options = New-Object OpenQA.Selenium.Edge.EdgeOptions
-    $options.AddArgument("--log-level=3")
-    $options.AddArgument("--disable-logging")
-    $options.AddArgument("--window-size=600,800")
-    $options.AddArgument("--output=/dev/null")
-    $options.AddArgument("--disable-extensions")
-    #$options.AddArgument("--headless")
+    $options.AddArgument('--log-level=3')
+    $options.AddArgument('--disable-logging')
+    $options.AddArgument('--window-size=600,800')
+    $options.AddArgument('--output=/dev/null')
+    $options.AddArgument('--disable-extensions')
+    #$options.AddArgument('--headless')
     #$options.AcceptInsecureCertificates = $true
-    $logLevel = [OpenQA.Selenium.LogLevel] "Off" # All[0], Debug[1], Info[2], Warning[3], Severe[4], Off[5]
+    $logLevel = [OpenQA.Selenium.LogLevel] 'Off' # All[0], Debug[1], Info[2], Warning[3], Severe[4], Off[5]
     $options.SetLoggingPreference([OpenQA.Selenium.LogType]::Browser, $logLevel)
     #$options.SetLoggingPreference([OpenQA.Selenium.LogType]::Client, $logLevel)
     $options.SetLoggingPreference([OpenQA.Selenium.LogType]::Driver, $logLevel)
@@ -129,18 +138,20 @@ function New-AuthorizationCodeFlowToken
     # Enable a pause here to see what is going on if $code does not look as expected!
     #pause
 
-    while (!$webDriver.Url.Contains("code=")) { Start-Sleep -Seconds 1 }
+    while (!$webDriver.Url.Contains('code=')) {
+        Start-Sleep -Seconds 1
+    }
     $parsedQueryString = [System.Web.HttpUtility]::ParseQueryString($webDriver.Url)
     Write-Host ($parsedQueryString -join "|")
     Write-Host ($parsedQueryString.Gettype())
     $code = $parsedQueryString[0]
     $webDriver.Quit()
 
-    Write-Verbose "Received code: $code"
-    Write-Verbose "Exchanging code for a token"
+    Write-Verbose ('Received code: {0}' -f $code)
+    Write-Verbose 'Exchanging code for a token'
 
     $headers = @{
-        "content-type" = "application/x-www-form-urlencoded"
+        'content-type' = 'application/x-www-form-urlencoded'
     }
 
     $body = @{
@@ -152,8 +163,8 @@ function New-AuthorizationCodeFlowToken
     }
 
     $params = @{
-        Uri     = $tokenEndpoint
-        Method  = "Post"
+        Uri     = TokenEndpointUri
+        Method  = 'Post'
         Headers = $headers
         Body = $body
     }
