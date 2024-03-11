@@ -163,7 +163,7 @@ function New-AuthorizationCodeFlowToken
     }
 
     $params = @{
-        Uri     = TokenEndpointUri
+        Uri     = $TokenEndpointUri
         Method  = 'Post'
         Headers = $headers
         Body = $body

@@ -1,7 +1,12 @@
 # Refreshes token (Coinbase)
 function Update-CoinbaseToken {
     param (
-        [PSCustomObject]$Token,
+        [Parameter(Mandatory)]
+        [PSCustomObject]
+        $Token,
+
+        [Parameter(Mandatory)]
+        [PSCustomObject]
         $AppData
     )
 
@@ -13,8 +18,8 @@ function Update-CoinbaseToken {
 
     $body = @{
         "grant_type" = "refresh_token"
-        "client_id" = $AppData.Key
-        "client_secret" = $AppData.Secret
+        "client_id" = $AppData.ClientId
+        "client_secret" = $AppData.ClientSecret
         "refresh_token" = $Token.refresh_token
     }
 

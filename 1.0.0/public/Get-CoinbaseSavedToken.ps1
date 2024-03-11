@@ -1,9 +1,10 @@
 function Get-CoinbaseSavedToken
 {
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory)]
         [ValidateSet("Coinbase","CoinbasePro")]
-        [string]$Application
+        [string]
+        $Application
     )
 
     $secretsFile = "$($Env:AppData)\Coinbase-Secrets\$($Application)Token.json"
