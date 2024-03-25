@@ -1,7 +1,6 @@
 # Generate new token using the Authorization Code Flow with PKCE
 # Example; $t = New-AuthorizationCodeFlowwithPKCETokenTerminal -ClientId "Lpm7yAITd7wR0Xk2jUPbrlw1dEVXDkhz" -LoginHint "henric@thestorms.se" -RedirectUri "https://jwt.ms" -AuthorizeEndpointUri "https://identity-dev.coor.com/authorize" -TokenEndpointUri "https://identity-dev.coor.com/oauth/token"
-function New-AuthorizationCodeFlowwithPKCETokenTerminal
-{
+function New-AuthorizationCodeFlowwithPKCETokenTerminal {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
@@ -10,7 +9,7 @@ function New-AuthorizationCodeFlowwithPKCETokenTerminal
 
         [Parameter()]
         [string[]]
-        $Scopes = @("openid", "profile", "email"),
+        $Scopes = @('openid', 'profile', 'email'),
 
         [Parameter()]
         [string]
@@ -32,10 +31,6 @@ function New-AuthorizationCodeFlowwithPKCETokenTerminal
         [string]
         $TokenEndpointUri,
 
-        #[Parameter(Mandatory)]
-        #[string]
-        #$Auth0Domain,
-
         [Parameter()]
         [string]
         $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0'
@@ -43,14 +38,12 @@ function New-AuthorizationCodeFlowwithPKCETokenTerminal
 
     # The PKCE module needs to be installed; Install-Module -Name PKCE
     # Import module PKCE if not already imported
-    if (!(Get-Module -Name PKCE))
-    {
-        Write-Verbose "Loading module ""PKCE"""
+    if (!(Get-Module -Name PKCE)) {
+        Write-Verbose 'Loading module "PKCE"'
         try {
-            Import-Module -Name PKCE -ErrorAction Stop
+            Import-Module -Name 'PKCE' -Force -ErrorAction Stop
         }
-        catch
-        {
+        catch {
             Write-Host -ForegroundColor Red $_.Exception.Message
             break
         }
@@ -73,19 +66,19 @@ function New-AuthorizationCodeFlowwithPKCETokenTerminal
     #$tokenEndpoint = "$($baseUri)/oauth/token"
 
     $querystring = @(
-        "client_id=$($ClientId)"
-        "scope=$([System.Web.HTTPUtility]::UrlEncode($Scopes))"
-        "redirect_uri=$([System.Web.HTTPUtility]::UrlEncode($RedirectUri))"
-        "response_type=code"
-        "code_challenge=$($pkce.code_challenge)"
-        "code_challenge_method=S256"
+        'client_id={0}' -f $ClientId
+        'scope={0}' -f [System.Web.HTTPUtility]::UrlEncode($Scopes)
+        'redirect_uri={0}' -f [System.Web.HTTPUtility]::UrlEncode($RedirectUri)
+        'response_type=code'
+        'code_challenge={0}' -f $pkce.code_challenge
+        'code_challenge_method=S256'
     ) -join "&"
 
     if ($LoginHint) {
-        $querystring += "&login_hint=$([System.Web.HTTPUtility]::UrlEncode($LoginHint))"
+        $querystring += '&login_hint={0}' -f [System.Web.HTTPUtility]::UrlEncode($LoginHint)
     }
     if ($Audience) {
-        $querystring += "&audience=$([System.Web.HTTPUtility]::UrlEncode($Audience))"
+        $querystring += '&audience={0}' -f [System.Web.HTTPUtility]::UrlEncode($Audience)
     }
 
     #$uri = "$($authorizeEndpoint)?$($querystring)"
@@ -134,13 +127,13 @@ function New-AuthorizationCodeFlowwithPKCETokenTerminal
 
     # Create login session and return form fields
     $Params = @{
-        Uri                = $uri
-        Method             = 'GET'
-        UserAgent          = $UserAgent
-        Headers            = @{
+        Headers   = @{
             'Accept'          = 'application/json'
             'Accept-Encoding' = 'gzip, deflate'
         }
+        UserAgent = $UserAgent
+        Method    = 'GET'
+        Uri       = $uri
     }
     $Response = Invoke-WebRequest @Params -SessionVariable 'WebSession' -ErrorAction 'Stop'
     $FormFields = @{}
@@ -162,24 +155,20 @@ function New-AuthorizationCodeFlowwithPKCETokenTerminal
     Write-Verbose "Received code: $code"
     Write-Verbose "Exchanging code for a token"
 
-    $headers = @{
-        "content-type" = "application/x-www-form-urlencoded"
-    }
-
-    $body = @{
-        "grant_type" = "authorization_code"
-        "client_id" = $ClientId
-        "code_verifier" = $pkce.code_verifier
-        "code" = $code
-        "redirect_uri" = $RedirectUri
-    }
-
     $params = @{
+        Headers = @{
+            'content-type' = 'application/x-www-form-urlencoded'
+        }
+        Method  = 'Post'
         #Uri     = $tokenEndpoint
         Uri     = $TokenEndpointUri
-        Method  = "Post"
-        Headers = $headers
-        Body = $body
+        Body    = @{
+            'grant_type'    = 'authorization_code'
+            'client_id'     = $ClientId
+            'code_verifier' = $pkce.code_verifier
+            'code'          = $code
+            'redirect_uri'  = $RedirectUri
+        }
     }
 
     return Invoke-RestMethod @params

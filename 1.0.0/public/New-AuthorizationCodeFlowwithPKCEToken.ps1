@@ -1,15 +1,14 @@
 # Generate new token using the Authorization Code Flow with PKCE
-function New-AuthorizationCodeFlowwithPKCEToken
-{
+function New-AuthorizationCodeFlowwithPKCEToken {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
         [string]
         $ClientId,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string[]]
-        $Scopes,
+        $Scopes = @('openid', 'profile', 'email'),
 
         [Parameter()]
         [string]
@@ -20,20 +19,20 @@ function New-AuthorizationCodeFlowwithPKCEToken
         $LoginHint,
 
         [Parameter(Mandatory)]
-        [string]
+        [System.Uri]
         $RedirectUri,
 
         [Parameter(Mandatory)]
-        [string]
+        [System.Uri]
         $AuthorizeEndpointUri,
 
         [Parameter(Mandatory)]
-        [string]
+        [System.Uri]
         $TokenEndpointUri,
 
-        [Parameter(Mandatory)]
-        [string]
-        $Auth0Domain
+        [Parameter()]
+        [System.Uri]
+        $ClientAssertion
     )
 
     # In order to this function to run, Silenium Web Driver DLL needs to be downloaded; https://www.selenium.dev/downloads/
@@ -41,34 +40,29 @@ function New-AuthorizationCodeFlowwithPKCEToken
     # Also the PKCE module needs to be installed; Install-Module -Name PKCE
     $seleniumWebDriverPath = "C:\Users\HenricStorm\OneDrive - Advania\Kunder\Coor\Auth0 Powershell"
 
-    if (!(CheckMsEdgeDriverVersion -MsEdgeDriverPath "$($seleniumWebDriverPath)\msedgedriver.exe"))
-    {
+    if (!(CheckMsEdgeDriverVersion -MsEdgeDriverPath "$($seleniumWebDriverPath)\msedgedriver.exe")) {
         break
     }
 
     # Import module WebDriver if not already imported
-    if (!(Get-Module -Name WebDriver))
-    {
+    if (!(Get-Module -Name WebDriver)) {
         Write-Verbose "Loading module ""WebDriver"""
         try {
             Import-Module -Name "$($seleniumWebDriverPath)\WebDriver.dll" -ErrorAction Stop
         }
-        catch
-        {
+        catch {
             Write-Host -ForegroundColor Red $_.Exception.Message
             break
         }
     }
 
     # Import module PKCE if not already imported
-    if (!(Get-Module -Name PKCE))
-    {
-        Write-Verbose "Loading module ""PKCE"""
+    if (!(Get-Module -Name PKCE)) {
+        Write-Verbose 'Loading module "PKCE"'
         try {
             Import-Module -Name PKCE -ErrorAction Stop
         }
-        catch
-        {
+        catch {
             Write-Host -ForegroundColor Red $_.Exception.Message
             break
         }
@@ -79,11 +73,6 @@ function New-AuthorizationCodeFlowwithPKCEToken
 
     # Add scopes
     $Scopes = $Scopes -join ' '
-
-    # IDP Information
-    $baseUri = "https://$($Auth0Domain)"
-    $authorizeEndpoint = "$($baseUri)/authorize"
-    $tokenEndpoint = "$($baseUri)/oauth/token"
 
     $querystring = @(
         "client_id=$($ClientId)"
@@ -141,24 +130,28 @@ function New-AuthorizationCodeFlowwithPKCEToken
     Write-Verbose "Received code: $code"
     Write-Verbose "Exchanging code for a token"
 
-    $headers = @{
-        "content-type" = "application/x-www-form-urlencoded"
+    $body = @{
+        "grant_type"    = "authorization_code"
+        "client_id"     = $ClientId
+        "code_verifier" = $pkce.code_verifier
+        "code"          = $code
+        "redirect_uri"  = $RedirectUri
     }
 
-    $body = @{
-        "grant_type" = "authorization_code"
-        "client_id" = $ClientId
-        "code_verifier" = $pkce.code_verifier
-        "code" = $code
-        "redirect_uri" = $RedirectUri
+    if ($ClientAssertion) {
+        $body.Add('client_assertion', $ClientAssertion)
+        $body.Add('client_assertion_type', 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer')
     }
+
+    Write-Verbose "Body: $($body | ConvertTo-Json -Depth 5)"
 
     $params = @{
-        #Uri     = $tokenEndpoint
+        Headers = @{
+            'content-type' = 'application/x-www-form-urlencoded'
+        }
+        Method  = 'Post'
         Uri     = $TokenEndpointUri
-        Method  = "Post"
-        Headers = $headers
-        Body = $body
+        Body    = $body
     }
 
     return Invoke-RestMethod @params
