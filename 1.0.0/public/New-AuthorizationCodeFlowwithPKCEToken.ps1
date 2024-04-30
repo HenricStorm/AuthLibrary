@@ -1,4 +1,7 @@
 # Generate new token using the Authorization Code Flow with PKCE
+# Example; $t = New-AuthorizationCodeFlowwithPKCEToken -ClientId "xZhZYksmwYP8JjdMnZp3mR0wKpv8jWHE" -Scopes "openid","profile","email","read:workorder","update:workorder","read:workorder-proposedwork","update:workorder-proposedwork","read:workorder-completedwork","update:workorder-completedwork" -Audience "https://acos01apms.azure-api.net" -LoginHint "henric@thestorms.se" -RedirectUri "https://localhost:9254/oidc/callback" -AuthorizeEndpointUri 'https://identity-dev.coor.com/authorize' -TokenEndpointUri 'https://identity-dev.coor.com/oauth/token'
+
+
 function New-AuthorizationCodeFlowwithPKCEToken {
     [CmdletBinding()]
     param (
