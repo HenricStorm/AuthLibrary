@@ -164,27 +164,23 @@ function New-AuthorizationCodeFlowToken
     Write-Verbose ('Received code: {0}' -f $code)
     Write-Verbose 'Exchanging code for a token'
 
-    $headers = @{
-        'content-type' = 'application/x-www-form-urlencoded'
-    }
-
-    $body = @{
-        "grant_type" = "authorization_code"
-        "client_id" = $ClientId
-        "client_secret" = $ClientSecret
-        "code" = $code
-        "redirect_uri" = $RedirectUri
-    }
-
     $params = @{
         Uri     = $TokenEndpointUri
         Method  = 'Post'
-        Headers = $headers
-        Body = $body
+        Headers = @{
+            'content-type' = 'application/x-www-form-urlencoded'
+        }
+        Body = @{
+            "grant_type" = "authorization_code"
+            "client_id" = $ClientId
+            "client_secret" = $ClientSecret
+            "code" = $code
+            "redirect_uri" = $RedirectUri
+        }
     }
 
     Write-Host -ForegroundColor Cyan "URI: $($uri)"
-    Write-Host -ForegroundColor Cyan "Headers: $($headers)"
-    Write-Host -ForegroundColor Cyan "Body: $($body)"
+    Write-Host -ForegroundColor Cyan "Headers: $($headers | ConvertTo-Json -Depth 5)"
+    Write-Host -ForegroundColor Cyan "Body: $($body | ConvertTo-Json -Depth 5)"
     return Invoke-RestMethod @params
 }

@@ -10,24 +10,18 @@ function Update-CoinbaseToken {
         $AppData
     )
 
-    $uri = "https://api.coinbase.com/oauth/token"
-
-    $headers = @{
-        "content-type" = "application/x-www-form-urlencoded"
-    }
-
-    $body = @{
-        "grant_type" = "refresh_token"
-        "client_id" = $AppData.ClientId
-        "client_secret" = $AppData.ClientSecret
-        "refresh_token" = $Token.refresh_token
-    }
-
     $params = @{
-        Uri     = $uri
-        Method  = "Post"
-        Headers = $headers
-        Body = $body
+        Headers = @{
+            'content-type' = 'application/x-www-form-urlencoded'
+        }
+        Method  = 'Post'
+        Uri     = 'https://api.coinbase.com/oauth/token'
+        Body    = @{
+            'grant_type'    = 'refresh_token'
+            'client_id'     = $AppData.ClientId
+            'client_secret' = $AppData.ClientSecret
+            'refresh_token' = $Token.refresh_token
+        }
     }
 
     $result = Invoke-RestMethod @params
