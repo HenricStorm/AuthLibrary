@@ -11,7 +11,7 @@
 RootModule = 'AuthLibrary.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.0'
+ModuleVersion = '1.0.1'
 
 # ID used to uniquely identify this module
 GUID = '0c35aef1-67f7-47a6-9b29-32ef2e7738bd'

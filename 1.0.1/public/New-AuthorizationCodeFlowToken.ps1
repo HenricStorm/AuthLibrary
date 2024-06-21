@@ -4,39 +4,53 @@ function New-AuthorizationCodeFlowToken
 {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ParameterSetName='Default')]
+        [Parameter(Mandatory, ParameterSetName='Entra')]
         [string]
         $ClientId,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ParameterSetName='Default')]
+        [Parameter(Mandatory, ParameterSetName='Entra')]
         [string]
         $ClientSecret,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ParameterSetName='Default')]
+        [Parameter(Mandatory, ParameterSetName='Entra')]
+        [ValidatePattern('http://*', 'https://*')]
+        [uri]
+        $RedirectUri,
+
+        [Parameter(Mandatory, ParameterSetName='Default')]
+        [Parameter(Mandatory, ParameterSetName='Entra')]
         [string[]]
         $Scopes,
 
-        [Parameter()]
+        [Parameter(ParameterSetName='Default')]
+        [Parameter(ParameterSetName='Entra')]
         [string]
         $Audience,
 
-        [Parameter()]
+        [Parameter(ParameterSetName='Default')]
+        [Parameter(ParameterSetName='Entra')]
         [string]
         $LoginHint,
 
-        [Parameter(Mandatory)]
-        [string]
-        $RedirectUri,
-
-        [Parameter(Mandatory)]
-        [string]
+        [Parameter(Mandatory, ParameterSetName='Default')]
+        [ValidatePattern('http://*', 'https://*')]
+        [uri]
         $AuthorizeEndpointUri,
 
-        [Parameter(Mandatory)]
-        [string]
+        [Parameter(Mandatory, ParameterSetName='Default')]
+        [ValidatePattern('http://*', 'https://*')]
+        [uri]
         $TokenEndpointUri,
 
-        [Parameter()]
+        [Parameter(Mandatory, ParameterSetName='Entra')]
+        [guid]
+        $EntraTenantId, # To build "https://login.microsoftonline.com/{domain name}/v2.0/.well-known/openid-configuration"
+
+        [Parameter(ParameterSetName='Default')]
+        [Parameter(ParameterSetName='Entra')]
         [string[]]
         $AdditionalParameters
     )

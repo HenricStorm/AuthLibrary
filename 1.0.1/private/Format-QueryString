@@ -1,0 +1,14 @@
+function Format-QueryString {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [hashtable]
+        $Hashtable
+    )
+
+    $queryString = $Hashtable.GetEnumerator() | ForEach-Object {
+        '{0}={1}' -f $_.key, $_.value
+    } | Join-String -Separator '&'
+
+    return $queryString
+}
