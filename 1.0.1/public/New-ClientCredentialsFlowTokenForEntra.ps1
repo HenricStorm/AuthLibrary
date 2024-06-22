@@ -1,4 +1,4 @@
-function New-EntraClientCredentialsFlowToken {
+function New-ClientCredentialsFlowTokenForEntra {
     [cmdletbinding()]
     Param (
         [Parameter(Mandatory, ParameterSetName = 'Default')]
@@ -18,11 +18,11 @@ function New-EntraClientCredentialsFlowToken {
 
         [Parameter(Mandatory, ParameterSetName = 'Default')]
         [ValidatePattern('http://*', 'https://*')]
-        [uri]
+        [System.Uri]
         $TokenEndpointUri,
 
         [Parameter(Mandatory, ParameterSetName = 'EndpointFromLookup')]
-        [guid]
+        [System.Guid]
         $EntraTenantId,
 
         [Parameter(ParameterSetName = 'Default')]
@@ -58,7 +58,7 @@ function New-EntraClientCredentialsFlowToken {
             'client_secret' = $ClientSecret
             'audience'      = $Audience
             'grant_type'    = "client_credentials"
-        } | Format-QueryString
+        } | ConvertTo-QueryString
     }
 
     $response = Invoke-WebRequest @params

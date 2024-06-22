@@ -1,4 +1,4 @@
-function New-Auth0ClientCredentialsFlowToken {
+function New-ClientCredentialsFlowTokenForAuth0 {
     [cmdletbinding()]
     Param (
         [Parameter(Mandatory)]
@@ -15,7 +15,7 @@ function New-Auth0ClientCredentialsFlowToken {
 
         #[Parameter(Mandatory)]
         #[ValidatePattern('http://*', 'https://*')]
-        #[uri]
+        #[System.Uri]
         #$TokenEndpointUri,
 
         [Parameter(Mandatory)]

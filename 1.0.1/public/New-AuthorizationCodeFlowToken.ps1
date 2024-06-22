@@ -1,56 +1,55 @@
 # Generate new token using the Authorization Code Flow
 # Example; $t = New-AuthorizationCodeFlowToken -ClientId "Lpm7yAITd7wR0Xk2jUPbrlw1dEVXDkhz" -Scopes "openid","profile","email","serviceRequest","read:workorder","create:workorder" -Audience "https://acos01apms.azure-api.net" -LoginHint "henric@thestorms.se"
-function New-AuthorizationCodeFlowToken
-{
+function New-AuthorizationCodeFlowToken {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory, ParameterSetName='Default')]
-        [Parameter(Mandatory, ParameterSetName='Entra')]
+        [Parameter(Mandatory, ParameterSetName = 'Default')]
+        [Parameter(Mandatory, ParameterSetName = 'Entra')]
         [string]
         $ClientId,
 
-        [Parameter(Mandatory, ParameterSetName='Default')]
-        [Parameter(Mandatory, ParameterSetName='Entra')]
+        [Parameter(Mandatory, ParameterSetName = 'Default')]
+        [Parameter(Mandatory, ParameterSetName = 'Entra')]
         [string]
         $ClientSecret,
 
-        [Parameter(Mandatory, ParameterSetName='Default')]
-        [Parameter(Mandatory, ParameterSetName='Entra')]
+        [Parameter(Mandatory, ParameterSetName = 'Default')]
+        [Parameter(Mandatory, ParameterSetName = 'Entra')]
         [ValidatePattern('http://*', 'https://*')]
-        [uri]
+        [System.Uri]
         $RedirectUri,
 
-        [Parameter(Mandatory, ParameterSetName='Default')]
-        [Parameter(Mandatory, ParameterSetName='Entra')]
+        [Parameter(Mandatory, ParameterSetName = 'Default')]
+        [Parameter(Mandatory, ParameterSetName = 'Entra')]
         [string[]]
         $Scopes,
 
-        [Parameter(ParameterSetName='Default')]
-        [Parameter(ParameterSetName='Entra')]
+        [Parameter(ParameterSetName = 'Default')]
+        [Parameter(ParameterSetName = 'Entra')]
         [string]
         $Audience,
 
-        [Parameter(ParameterSetName='Default')]
-        [Parameter(ParameterSetName='Entra')]
+        [Parameter(Mandatory, ParameterSetName = 'Default')]
+        [ValidatePattern('http://*', 'https://*')]
+        [System.Uri]
+        $AuthorizeEndpointUri,
+
+        [Parameter(Mandatory, ParameterSetName = 'Default')]
+        [ValidatePattern('http://*', 'https://*')]
+        [System.Uri]
+        $TokenEndpointUri,
+
+        [Parameter(Mandatory, ParameterSetName = 'Entra')]
+        [System.Guid]
+        $EntraTenantId, # To build "https://login.microsoftonline.com/{domain name}/v2.0/.well-known/openid-configuration"
+
+        [Parameter(ParameterSetName = 'Default')]
+        [Parameter(ParameterSetName = 'Entra')]
         [string]
         $LoginHint,
 
-        [Parameter(Mandatory, ParameterSetName='Default')]
-        [ValidatePattern('http://*', 'https://*')]
-        [uri]
-        $AuthorizeEndpointUri,
-
-        [Parameter(Mandatory, ParameterSetName='Default')]
-        [ValidatePattern('http://*', 'https://*')]
-        [uri]
-        $TokenEndpointUri,
-
-        [Parameter(Mandatory, ParameterSetName='Entra')]
-        [guid]
-        $EntraTenantId, # To build "https://login.microsoftonline.com/{domain name}/v2.0/.well-known/openid-configuration"
-
-        [Parameter(ParameterSetName='Default')]
-        [Parameter(ParameterSetName='Entra')]
+        [Parameter(ParameterSetName = 'Default')]
+        [Parameter(ParameterSetName = 'Entra')]
         [string[]]
         $AdditionalParameters
     )
@@ -62,19 +61,16 @@ function New-AuthorizationCodeFlowToken
     # Also you need to download the "msedgedriver.exe" matching your Edge browser version; https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver
     $seleniumWebDriverPath = 'C:\Users\HenricStorm\OneDrive - Advania\Kunder\Coor\Auth0 Powershell'
 
-    if (!(CheckMsEdgeDriverVersion -MsEdgeDriverPath ('{0}\msedgedriver.exe' -f $seleniumWebDriverPath)))
-    {
+    if (!(CheckMsEdgeDriverVersion -MsEdgeDriverPath ('{0}\msedgedriver.exe' -f $seleniumWebDriverPath))) {
         break
     }
 
-    if (!(Get-Module -Name WebDriver))
-    {
+    if (!(Get-Module -Name WebDriver)) {
         Write-Verbose 'Loading module "WebDriver"'
         try {
             Import-Module -Name ('{0}\WebDriver.dll' -f $seleniumWebDriverPath) -ErrorAction Stop
         }
-        catch
-        {
+        catch {
             Write-Host -ForegroundColor Red $_.Exception.Message
             break
         }
@@ -87,44 +83,36 @@ function New-AuthorizationCodeFlowToken
     #$tokenAuthorizeEndpoint = "$($baseUri)/authorize"
     #$tokenEndpoint = "$($baseUri)/oauth/token"
 
-    <#
-    if ($AuthorizeEndpointUri)
-    {
-        $tokenAuthorizeEndpoint = $AuthorizeEndpointUri
-    }
-    if ($TokenEndpointUri)
-    {
-        $tokenEndpoint = $TokenEndpointUri
-    }
-    #>
-
     # Optionals
     #$Audience = "https://acos01apms.azure-api.net"
     #$LoginHint = "henric@thestorms.se"
 
-    $querystring = @(
-        "client_id=$($ClientId)"
-        "scope=$([System.Web.HTTPUtility]::UrlEncode($Scopes))"
-        "redirect_uri=$([System.Web.HTTPUtility]::UrlEncode($RedirectUri))"
-        'response_type=code'
-    ) -join '&'
-    Write-Host ('Querystring: {0}' -f $querystring)
-    if ($AdditionalParameters)
-    {
-        $querystring += '&{0}' + $AdditionalParameters -join "&"
+    if ($PSCmdlet.ParameterSetName -eq 'Entra') {
+        $params = @{
+            Method = 'Get'
+            Uri    = 'https://login.microsoftonline.com/{0}/v2.0/.well-known/openid-configuration' -f $EntraTenantId
+        }
+        $response = Invoke-RestMethod @params
+        $TokenEndpointUri = $response.token_endpoint
     }
-    Write-Host ('Querystring: {0}' -f $querystring)
 
-    if ($LoginHint) {
-        $querystring += '&login_hint={0}' -f [System.Web.HTTPUtility]::UrlEncode($LoginHint)
+    $querystringBuilder = @{
+        'client_id'     = $ClientId
+        'scope'         = [System.Web.HTTPUtility]::UrlEncode($Scopes)
+        'redirect_uri'  = [System.Web.HTTPUtility]::UrlEncode($RedirectUri)
+        'response_type' = 'code'
     }
     if ($Audience) {
-        $querystring += '&audience={0}' -f [System.Web.HTTPUtility]::UrlEncode($Audience)
+        $querystringBuilder.Add('audience', [System.Web.HTTPUtility]::UrlEncode($Audience))
     }
+    if ($LoginHint) {
+        $querystringBuilder.Add('login_hint', [System.Web.HTTPUtility]::UrlEncode($LoginHint))
+    }
+    $querystring = $querystringBuilder | ConvertTo-QueryString
 
-    $uri = '{0}?{1}' -f $AuthorizeEndpointUri, $querystring
-    Write-Verbose ('Opening URI: {0}' -f $uri)
-    Write-Verbose 'Opening Web browser. Please authenticate.'
+    if ($AdditionalParameters) {
+        $querystring += '&{0}' + $AdditionalParameters -join "&"
+    }
 
     $options = New-Object OpenQA.Selenium.Edge.EdgeOptions
     $options.AddArgument('--log-level=3')
@@ -147,7 +135,10 @@ function New-AuthorizationCodeFlowToken
         Write-Warning "$($_.Exception.Message)"
         break
     }
-    $webDriver.Url = $uri
+
+    $webDriver.Url = "${AuthorizeEndpointUri}?${querystring}"
+    Write-Verbose "Opening URI: ${$webDriver.Url}"
+    Write-Verbose 'Opening Web browser. Please authenticate.'
 
     # Enable a pause here to see what is going on if $code does not look as expected!
     #pause
@@ -170,12 +161,12 @@ function New-AuthorizationCodeFlowToken
         Headers = @{
             'content-type' = 'application/x-www-form-urlencoded'
         }
-        Body = @{
-            "grant_type" = "authorization_code"
-            "client_id" = $ClientId
+        Body    = @{
+            "grant_type"    = "authorization_code"
+            "client_id"     = $ClientId
             "client_secret" = $ClientSecret
-            "code" = $code
-            "redirect_uri" = $RedirectUri
+            "code"          = $code
+            "redirect_uri"  = $RedirectUri
         }
     }
 
