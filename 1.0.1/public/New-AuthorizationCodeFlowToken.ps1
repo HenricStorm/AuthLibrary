@@ -15,7 +15,7 @@ function New-AuthorizationCodeFlowToken {
 
         [Parameter(Mandatory, ParameterSetName = 'Default')]
         [Parameter(Mandatory, ParameterSetName = 'Entra')]
-        [ValidatePattern('http://*', 'https://*')]
+        [ValidatePattern('^(https?)://')]
         [System.Uri]
         $RedirectUri,
 
@@ -30,12 +30,12 @@ function New-AuthorizationCodeFlowToken {
         $Audience,
 
         [Parameter(Mandatory, ParameterSetName = 'Default')]
-        [ValidatePattern('http://*', 'https://*')]
+        [ValidatePattern('^(https?)://')]
         [System.Uri]
         $AuthorizeEndpointUri,
 
         [Parameter(Mandatory, ParameterSetName = 'Default')]
-        [ValidatePattern('http://*', 'https://*')]
+        [ValidatePattern('^(https?)://')]
         [System.Uri]
         $TokenEndpointUri,
 
@@ -170,8 +170,8 @@ function New-AuthorizationCodeFlowToken {
         }
     }
 
-    Write-Host -ForegroundColor Cyan "URI: $($uri)"
-    Write-Host -ForegroundColor Cyan "Headers: $($headers | ConvertTo-Json -Depth 5)"
-    Write-Host -ForegroundColor Cyan "Body: $($body | ConvertTo-Json -Depth 5)"
+    #Write-Host -ForegroundColor Cyan "URI: $($uri)"
+    #Write-Host -ForegroundColor Cyan "Headers: $($headers | ConvertTo-Json -Depth 5)"
+    #Write-Host -ForegroundColor Cyan "Body: $($body | ConvertTo-Json -Depth 5)"
     return Invoke-RestMethod @params
 }
