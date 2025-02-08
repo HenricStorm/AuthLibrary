@@ -46,5 +46,5 @@ function New-ClientCredentialsFlowTokenForAuth0 {
     $response = Invoke-RestMethod @params
     Register-AuthToken -Token $response
 
-    return $token
+    return $response
 }
