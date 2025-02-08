@@ -1,5 +1,5 @@
-function Get-CoinbaseSavedToken
-{
+function Get-CoinbaseSavedToken {
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
         [ValidateSet("Coinbase","CoinbasePro")]
@@ -9,8 +9,7 @@ function Get-CoinbaseSavedToken
 
     $secretsFile = "$($Env:AppData)\Coinbase-Secrets\$($Application)Token.json"
 
-    if (Test-Path -Path $secretsFile)
-    {
+    if (Test-Path -Path $secretsFile) {
         $token = Get-Content -Encoding utf8 -Path $secretsFile | ConvertFrom-Json
         return $token
     }

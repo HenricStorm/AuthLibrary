@@ -1,6 +1,7 @@
 # HMAC SHA256 code derived from
 # http://www.jokecamp.com/blog/examples-of-creating-base64-hashes-using-hmac-sha256-in-different-languages/
 function hmac {
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
         [string]

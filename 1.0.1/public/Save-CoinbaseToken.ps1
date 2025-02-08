@@ -1,17 +1,19 @@
-function Save-CoinbaseToken
-{
+function Save-CoinbaseToken {
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
-        [object]$Token,
+        [object]
+        $Token,
+
         [Parameter(Mandatory = $true)]
         [ValidateSet("Coinbase","CoinbasePro")]
-        [string]$Application
+        [string]
+        $Application
     )
 
     $secretsDirectory = "$($Env:AppData)\Coinbase-Secrets"
 
-    if (!(Test-Path -Path $secretsDirectory))
-    {
+    if (!(Test-Path -Path $secretsDirectory)) {
         New-Item -ItemType Directory -Path $secretsDirectory
     }
 

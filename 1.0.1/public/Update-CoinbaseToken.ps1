@@ -1,5 +1,6 @@
 # Refreshes token (Coinbase)
 function Update-CoinbaseToken {
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
         [PSCustomObject]

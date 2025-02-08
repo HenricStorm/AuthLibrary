@@ -1,11 +1,19 @@
-function Get-TokenAudience
-{
-    [cmdletbinding()]
-    Param (
-        [Parameter(Mandatory)]
+function Get-TokenAudience {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory, ParameterSetName = 'Token')]
         [object]
-        $Token
+        $Token,
+
+        [Parameter(Mandatory, ParameterSetName = 'AccessToken')]
+        [string]
+        $AccessToken
     )
 
-    return (Expand-JWTtoken -AccessToken $Token.access_token).aud
+    if ($PSCmdlet.ParameterSetName -eq 'Token') {
+        $AccessToken = $Token.access_token
+    }
+
+    $expandedToken = Expand-JWTtoken -AccessToken $AccessToken
+    return $expandedToken.aud
 }

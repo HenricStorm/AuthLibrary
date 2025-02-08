@@ -1,4 +1,5 @@
 function ConvertTo-Hex {
+    [CmdletBinding()]
     param(
         [Parameter(ValueFromPipeline)]
         [byte[]]

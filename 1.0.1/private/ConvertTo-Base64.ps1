@@ -1,4 +1,5 @@
 function ConvertTo-Base64 {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory, ValueFromPipeline)]
         [string]

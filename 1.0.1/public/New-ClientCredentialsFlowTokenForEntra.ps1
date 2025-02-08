@@ -1,55 +1,47 @@
 function New-ClientCredentialsFlowTokenForEntra {
-    [cmdletbinding()]
-    Param (
-        [Parameter(Mandatory, ParameterSetName = 'Default')]
-        [Parameter(Mandatory, ParameterSetName = 'EndpointFromLookup')]
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
         [string]
         $ClientId,
 
-        [Parameter(Mandatory, ParameterSetName = 'Default')]
-        [Parameter(Mandatory, ParameterSetName = 'EndpointFromLookup')]
+        [Parameter(Mandatory)]
         [string]
         $ClientSecret,
 
-        [Parameter(Mandatory, ParameterSetName = 'Default')]
-        [Parameter(Mandatory, ParameterSetName = 'EndpointFromLookup')]
+        [Parameter(Mandatory)]
         [string]
         $Audience,
 
-        [Parameter(Mandatory, ParameterSetName = 'Default')]
-        [ValidatePattern('http://*', 'https://*')]
-        [System.Uri]
-        $TokenEndpointUri,
-
-        [Parameter(Mandatory, ParameterSetName = 'EndpointFromLookup')]
+        [Parameter(Mandatory)]
         [System.Guid]
         $EntraTenantId,
 
-        [Parameter(ParameterSetName = 'Default')]
-        [Parameter(ParameterSetName = 'EndpointFromLookup')]
+        [Parameter()]
         [switch]
         $ForceNew = $false
     )
 
     if (!$ForceNew) {
-        $cachedToken = Get-TokenGlobal -ClientId $ClientId
+        $cachedToken = Get-AuthToken -ClientId $ClientId
         if ($cachedToken) {
             return $cachedToken
         }
     }
 
-    if ($PSCmdlet.ParameterSetName -eq 'EndpointFromLookup') {
-        $params = @{
-            Method = 'Get'
-            Uri    = 'https://login.microsoftonline.com/{0}/v2.0/.well-known/openid-configuration' -f $EntraTenantId
-        }
-        $response = Invoke-RestMethod @params
-        $TokenEndpointUri = $response.token_endpoint
-    }
+    # if ($PSCmdlet.ParameterSetName -eq 'EndpointFromLookup') {
+    #     $params = @{
+    #         Method = 'Get'
+    #         Uri    = 'https://login.microsoftonline.com/{0}/v2.0/.well-known/openid-configuration' -f $EntraTenantId
+    #     }
+    #     $response = Invoke-RestMethod @params
+    #     $TokenEndpointUri = $response.token_endpoint
+    # }
+    $tokenEndpointUri = 'https://login.microsoftonline.com/{0}/oauth2/v2.0/token' -f $EntraTenantId
 
     $params = @{
         Method  = 'Post'
-        Uri     = $TokenEndpointUri
+        Uri     = $tokenEndpointUri
         Headers = @{
             'content-type' = 'application/x-www-form-urlencoded'
         }
@@ -63,7 +55,7 @@ function New-ClientCredentialsFlowTokenForEntra {
 
     $response = Invoke-WebRequest @params
     $token = ConvertFrom-Json -InputObject $response.Content
-    Register-TokenGlobal -Token $token
+    Register-AuthToken -Token $token
 
     return $token
 }

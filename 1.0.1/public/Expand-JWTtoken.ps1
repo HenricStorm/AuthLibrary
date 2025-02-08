@@ -1,6 +1,6 @@
 function Expand-JWTtoken {
-    [cmdletbinding()]
-    param(
+    [CmdletBinding()]
+    param (
         [Parameter(Mandatory)]
         [string]
         $AccessToken
@@ -8,8 +8,7 @@ function Expand-JWTtoken {
  
     #Validate as per https://tools.ietf.org/html/rfc7519
     #Access and ID tokens are fine, Refresh tokens will not work
-    if (!$AccessToken.Contains('.') -or !$AccessToken.StartsWith('eyJ'))
-    {
+    if (!$AccessToken.Contains('.') -or !$AccessToken.StartsWith('eyJ')) {
         Write-Error 'Invalid token' -ErrorAction Stop
     }
  

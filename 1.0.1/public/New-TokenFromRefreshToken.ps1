@@ -1,10 +1,9 @@
 #$Domain = "identity-dev.coor.com"
 #$Audience = "https://acos01apms.azure-api.net"
 
-function New-TokenFromRefreshToken
-{
-    [cmdletbinding()]
-    Param (
+function New-TokenFromRefreshToken {
+    [CmdletBinding()]
+    param (
         [Parameter(Mandatory)]
         [object]
         $Token,
@@ -18,8 +17,7 @@ function New-TokenFromRefreshToken
         $Domain = 'cooriddev.eu.auth0.com'
     )
 
-    if (!$Token.refresh_token)
-    {
+    if (!$Token.refresh_token) {
         Write-Warning 'Token contains no refresh_token'
         return
     }
@@ -49,7 +47,7 @@ function New-TokenFromRefreshToken
     $response = Invoke-WebRequest @params
     $response
     $token = ConvertFrom-Json -InputObject $response.Content
-    #Register-TokenGlobal -Token $token
+    #Register-AuthToken -Token $token
 
     return $token
 }

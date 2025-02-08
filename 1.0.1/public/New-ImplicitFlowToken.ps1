@@ -2,8 +2,8 @@
 #$Audience = "https://acos01apms.azure-api.net"
 
 function New-ImplicitFlowToken {
-    [cmdletbinding()]
-    Param (
+    [CmdletBinding()]
+    param (
         [Parameter(Mandatory)]
         [string]
         $ClientId,
@@ -55,7 +55,7 @@ function New-ImplicitFlowToken {
     #$response = try { Invoke-WebRequest @params -ErrorVariable err } catch { Write-Host $_.Exception }
     $response = Invoke-WebRequest @params
     $token = ConvertFrom-Json -InputObject $response.Content
-    #Register-TokenGlobal -Token $token
+    #Register-AuthToken -Token $token
 
     return $token
 }

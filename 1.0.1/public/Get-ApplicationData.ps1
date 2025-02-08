@@ -1,5 +1,5 @@
 function Get-ApplicationData {
-    [cmdletbinding()]
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory, ParameterSetName = 'ByName')]
         [string]

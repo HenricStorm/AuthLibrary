@@ -1,6 +1,6 @@
 function New-ClientCredentialsFlowTokenForAuth0 {
-    [cmdletbinding()]
-    Param (
+    [CmdletBinding()]
+    param (
         [Parameter(Mandatory)]
         [string]
         $ClientId,
@@ -13,11 +13,6 @@ function New-ClientCredentialsFlowTokenForAuth0 {
         [string]
         $Audience,
 
-        #[Parameter(Mandatory)]
-        #[ValidatePattern('http://*', 'https://*')]
-        #[System.Uri]
-        #$TokenEndpointUri,
-
         [Parameter(Mandatory)]
         [string]
         $Domain,
@@ -28,7 +23,7 @@ function New-ClientCredentialsFlowTokenForAuth0 {
     )
 
     if (!$ForceNew) {
-        $cachedToken = Get-TokenGlobal -ClientId $ClientId
+        $cachedToken = Get-AuthToken -ClientId $ClientId
         if ($cachedToken) {
             return $cachedToken
         }
@@ -47,10 +42,9 @@ function New-ClientCredentialsFlowTokenForAuth0 {
             'grant_type'    = "client_credentials"
         } | ConvertTo-Json
     }
-    #curl.exe --request POST --url "https://cooriddev.eu.auth0.com/oauth/token" --header ($headers | ConvertTo-Json) --data $body
 
     $response = Invoke-RestMethod @params
-    Register-TokenGlobal -Token $response
+    Register-AuthToken -Token $response
 
     return $token
 }

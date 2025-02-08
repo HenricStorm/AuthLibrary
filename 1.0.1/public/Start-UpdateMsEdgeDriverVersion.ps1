@@ -1,5 +1,4 @@
-function Start-UpdateMsEdgeDriverVersion
-{
+function Start-UpdateMsEdgeDriverVersion {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
@@ -14,8 +13,7 @@ function Start-UpdateMsEdgeDriverVersion
     $directory = ([System.IO.FileInfo]$MsEdgeDriverPath).DirectoryName
     $downloadedFilePath = "${directory}\edgedriver_win64.zip"
 
-    if (!(Test-Path -Path $directory))
-    {
+    if (!(Test-Path -Path $directory)) {
         Write-Host "Directory ${directory} does not exists. Creating it."
         New-Item -Path $directory
     }

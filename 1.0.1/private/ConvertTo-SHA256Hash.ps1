@@ -1,4 +1,5 @@
 function ConvertTo-SHA256Hash {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory, ValueFromPipeline)]
         [string]
